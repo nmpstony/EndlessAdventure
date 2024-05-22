@@ -1,0 +1,5 @@
+HEIGHT = 400
+WIDTH = HEIGHT * 3
+speed = 1.5
+FPS = 60
+BG = (144,201,120)

@@ -4,15 +4,15 @@ from _init__ import Character,screen,clock
 #from _init__ import
 def draw_bg():
     screen.fill(BG)
-    #global ground1_x, ground2_x
-    #screen.blit(bg,(0,0))
-    #screen.blit(ground,(ground1_x,HEIGHT - 64))
-    #screen.blit(ground,(ground2_x,HEIGHT - 64))
-    #ground1_x -=speed
-    #ground2_x -=speed
-    #if ground2_x <= 0:
-    #    ground1_x = 0
-    #    ground2_x = WIDTH
+    global ground1_x, ground2_x
+    screen.blit(bg,(0,0))
+    screen.blit(ground,(ground1_x,HEIGHT - 64))
+    screen.blit(ground,(ground2_x,HEIGHT - 64))
+    ground1_x -=speed
+    ground2_x -=speed
+    if ground2_x <= 0:
+        ground1_x = 0
+        ground2_x = WIDTH
 
 
 pg.init()
@@ -27,7 +27,7 @@ jump = False
 bg=pg.transform.scale(pg.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
 ground=pg.transform.scale(pg.image.load(r'Image/ground.png'),(WIDTH, 64))
 
-player = Character(200,400,3,2)
+player = Character(250,295,1.5,2)
 
 
 

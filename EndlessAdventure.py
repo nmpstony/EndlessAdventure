@@ -44,6 +44,11 @@ while True:
 
     player.move(jump)
 
+    if jump:
+        player.update_action(1)#jump
+    else:
+        player.update_action(0)#run
+
     for event in pg.event.get():
         #quit game
         if event.type == pg.QUIT:

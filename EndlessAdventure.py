@@ -1,6 +1,6 @@
 import pygame as pg
 from config import *
-from _init__ import Character,screen,clock
+from _init__ import Character,Obstacle,screen,clock
 
 def draw_bg():
     """
@@ -8,7 +8,7 @@ def draw_bg():
 
     This function fills the screen with the background color, draws the background image,
     and draws two ground images that move leftwards to create a continuous scrolling effect.
-    Resets the ground position when the second ground image goes off-screen.
+    Resets the ground position when the second ground image goes off-screen.-
     """
     screen.fill(BG)
     global ground1_x, ground2_x
@@ -37,7 +37,13 @@ bg=pg.transform.scale(pg.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
 ground=pg.transform.scale(pg.image.load(r'Image/ground.png'),(WIDTH, 64))
 
 # Create a player character
-player = Character(250,295,1.5)
+player = Character(250,295)
+obstacles = pg.sprite.Group()
+for _ in range(5):
+    obstacle = Obstacle()
+    obstacles.add(obstacle)
+
+all_sprites = pg.sprite.Group(player, *obstacles)
 
 while True:
     """
@@ -55,6 +61,13 @@ while True:
 
     player.gravity()
     player.jump(jump)
+    # Update
+    all_sprites.update()
+
+    # Check for collisions
+    if pg.sprite.spritecollide(player, obstacles, False):
+        break
+    all_sprites.draw(screen)
 
     if player.velocity < 0:
         player.update_action(1) #Jump
@@ -62,7 +75,7 @@ while True:
         player.update_action(2) #Fall
     else:
         player.update_action(0) #Run
-    
+    jump = False
     for event in pg.event.get():
         # Quit game
         if event.type == pg.QUIT:
@@ -73,9 +86,9 @@ while True:
             if event.key == pg.K_SPACE or event.key == pg.K_UP:
                 jump = True
 
-        # Keyboard released
-        if event.type == pg.KEYUP:
-            if event.key == pg.K_SPACE or event.key == pg.K_UP:
-                jump = False
+        ## Keyboard released
+        #if event.type == pg.KEYUP:
+        #    if event.key == pg.K_SPACE or event.key == pg.K_UP:
+        #        jump = False
     
     pg.display.update()

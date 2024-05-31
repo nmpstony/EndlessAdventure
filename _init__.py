@@ -1,10 +1,14 @@
 import pygame as pg
+import random
 from config import *
 
 # Initialize the game screen and clock
 screen = pg.display.set_mode((WIDTH,HEIGHT))
 clock = pg.time.Clock()
-
+# Load and scale images
+ob_size = pg.image.load(f'animation/run/0.png').get_height()//1.5
+OBSTACLE_IMG = pg.image.load("Image/bomb.png")
+OBSTACLE_IMG = pg.transform.scale(OBSTACLE_IMG, (ob_size,ob_size))
 class Character(pg.sprite.Sprite):
     """
     A class to represent a character in the game.
@@ -43,7 +47,7 @@ class Character(pg.sprite.Sprite):
     draw()
         Draws the character on the screen.
     """
-    def __init__(self, x, y, scale):
+    def __init__(self, x, y):
         """
         Initializes the character with a given position and scale.
 
@@ -88,7 +92,7 @@ class Character(pg.sprite.Sprite):
         Applies gravity to the character, updating its vertical velocity and position.
         Prevents the character from moving above the top or below the bottom of the screen.
         """
-        self.velocity += 1  # Gravity effect
+        self.velocity += 0.5  # Gravity effect
         self.rect.y += self.velocity
         if self.rect.top <= 0:
             self.rect.top = 0
@@ -147,3 +151,17 @@ class Character(pg.sprite.Sprite):
         Draws the character on the screen.
         """
         screen.blit(self.image, self.rect)
+
+class Obstacle(pg.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = OBSTACLE_IMG
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(WIDTH, 2*WIDTH)
+        self.rect.y = random.randint(0, HEIGHT - self.rect.height - 60)
+
+    def update(self):
+        self.rect.x -= speed
+        if self.rect.right < 0:
+            self.rect.x = random.randint(WIDTH, 2*WIDTH)
+            self.rect.y = random.randint(0, HEIGHT - self.rect.height - 60)

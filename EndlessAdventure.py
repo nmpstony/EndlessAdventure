@@ -1,8 +1,15 @@
 import pygame as pg
 from config import *
 from _init__ import Character,screen,clock
-#from _init__ import
+
 def draw_bg():
+    """
+    Draws the background and moving ground for the game.
+
+    This function fills the screen with the background color, draws the background image,
+    and draws two ground images that move leftwards to create a continuous scrolling effect.
+    Resets the ground position when the second ground image goes off-screen.
+    """
     screen.fill(BG)
     global ground1_x, ground2_x
     screen.blit(bg,(0,0))
@@ -14,27 +21,31 @@ def draw_bg():
         ground1_x = 0
         ground2_x = WIDTH
 
-
+# Initialize Pygame
 pg.init()
 
-
+# Clock for controlling the frame rate
 clock = pg.time.Clock()
 
+# Initial positions of the ground images
 ground1_x = 0
 ground2_x = WIDTH
 jump = False
 
+# Load and scale images
 bg=pg.transform.scale(pg.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
 ground=pg.transform.scale(pg.image.load(r'Image/ground.png'),(WIDTH, 64))
 
-player = Character(250,295,1.5,2)
-
-
-
-
+# Create a player character
+player = Character(250,295,1.5)
 
 while True:
+    """
+    Main game loop.
 
+    This loop handles the frame rate, background drawing, character animation and movement,
+    user input for jumping, and updating the display. The loop continues until the game is quit.
+    """
     clock.tick(FPS)
 
     draw_bg()
@@ -42,24 +53,27 @@ while True:
     player.update_animation()
     player.draw()
 
-    player.move(jump)
+    player.gravity()
+    player.jump(jump)
 
-    if jump:
-        player.update_action(1)#jump
+    if player.velocity < 0:
+        player.update_action(1) #Jump
+    elif player.velocity > 0 and player.rect.bottom < HEIGHT-60:
+        player.update_action(2) #Fall
     else:
-        player.update_action(0)#run
-
+        player.update_action(0) #Run
+    
     for event in pg.event.get():
-        #quit game
+        # Quit game
         if event.type == pg.QUIT:
             pg.quit()
             exit()
-        #keyborad presses
+        # Keyboard presses
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE or event.key == pg.K_UP:
                 jump = True
 
-        #keyboard released
+        # Keyboard released
         if event.type == pg.KEYUP:
             if event.key == pg.K_SPACE or event.key == pg.K_UP:
                 jump = False

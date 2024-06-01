@@ -3,12 +3,15 @@ import random
 from config import *
 
 # Initialize the game screen and clock
+pg.init()
 screen = pg.display.set_mode((WIDTH,HEIGHT))
 clock = pg.time.Clock()
+
 # Load and scale images
 ob_size = pg.image.load(f'animation/run/0.png').get_height()//1.5
 OBSTACLE_IMG = pg.image.load("Image/bomb.png")
 OBSTACLE_IMG = pg.transform.scale(OBSTACLE_IMG, (ob_size,ob_size))
+
 class Character(pg.sprite.Sprite):
     """
     A class to represent a character in the game.
@@ -62,10 +65,14 @@ class Character(pg.sprite.Sprite):
         """
         pg.sprite.Sprite.__init__(self)
         self.velocity = 0
+        self.score = 0
+        self.skyjump = 3
+        self.temp_skyjump = self.skyjump
         self.animation_list = []
         self.frame_index = 0
         self.action = 1
         self.update_time_animation = pg.time.get_ticks()
+        self.update_time_score = pg.time.get_ticks()
         self.update_time_jump = pg.time.get_ticks()
         temp_list = []
 
@@ -92,14 +99,16 @@ class Character(pg.sprite.Sprite):
         Applies gravity to the character, updating its vertical velocity and position.
         Prevents the character from moving above the top or below the bottom of the screen.
         """
-        self.velocity += 0.5  # Gravity effect
+        self.velocity += 0.25  # Gravity effect
         self.rect.y += self.velocity
-        if self.rect.top <= 0:
+        if self.rect.top < 0:
             self.rect.top = 0
-            self.velocity = 0
+            self.velocity = -0.25
         if self.rect.bottom >= HEIGHT-50:
             self.rect.bottom = HEIGHT-50
             self.velocity = 0
+            self.temp_skyjump = self.skyjump
+
 
     def jump(self,jump):
         """
@@ -111,14 +120,13 @@ class Character(pg.sprite.Sprite):
             If True, the character will jump.
         """
         if jump:
-            self.velocity = -10
+            self.velocity = -8
 
     def update_animation(self):
         """
         Updates the character's animation frame based on the current action and elapsed time.
         """
         ANIMATION_COOLDOWN = 150
-        JUMP_TIME = 20
         #update imgae depending on current frame
         self.image = self.animation_list[self.action][self.frame_index]
         #chech if enough time has passed since the last update
@@ -128,7 +136,12 @@ class Character(pg.sprite.Sprite):
         #if the animation has run our the reset back to the start
         if self.frame_index >= len(self.animation_list[self.action]):
             self.frame_index = 0
-
+    
+    def update_score(self):
+        SCORE_COOLDOWN = 300
+        if pg.time.get_ticks() - self.update_time_score > SCORE_COOLDOWN:
+            self.update_time_score = pg.time.get_ticks()
+            self.score +=1
 
     def update_action(self, new_action):
         """

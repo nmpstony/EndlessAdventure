@@ -15,6 +15,11 @@ def draw_bg():
     screen.blit(bg,(0,0))
     screen.blit(ground,(ground1_x,HEIGHT - 64))
     screen.blit(ground,(ground2_x,HEIGHT - 64))
+    score_txt = font.render(f'Distance: {player.score}m', True, (255,255,255))
+    score_rect = score_txt.get_rect(center = (WIDTH//2, 30))
+    screen.blit(score_txt,score_rect)
+    skyjump_txt = font.render(f'Skyjump: {player.skyjump}', True, (255,255,255))
+    screen.blit(skyjump_txt,(10,15))
     ground1_x -=speed
     ground2_x -=speed
     if ground2_x <= 0:
@@ -35,6 +40,9 @@ jump = False
 # Load and scale images
 bg=pg.transform.scale(pg.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
 ground=pg.transform.scale(pg.image.load(r'Image/ground.png'),(WIDTH, 64))
+
+# Load font
+font = pg.font.SysFont('sans',30)
 
 # Create a player character
 player = Character(250,295)
@@ -58,9 +66,10 @@ while True:
 
     player.update_animation()
     player.draw()
-
+    player.update_score()
     player.gravity()
     player.jump(jump)
+    
     # Update
     all_sprites.update()
 
@@ -83,8 +92,10 @@ while True:
             exit()
         # Keyboard presses
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_SPACE or event.key == pg.K_UP:
-                jump = True
+            if (event.key == pg.K_SPACE or event.key == pg.K_UP):
+                if player.temp_skyjump > 1:
+                    player.temp_skyjump -= 1
+                    jump = True
 
         ## Keyboard released
         #if event.type == pg.KEYUP:

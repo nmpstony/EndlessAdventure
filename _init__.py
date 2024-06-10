@@ -1,22 +1,23 @@
-import pygame as pg
-import random
+import pygame, random
 from config import *
 
 # Initialize the game screen and clock
-pg.init()
-screen = pg.display.set_mode((WIDTH,HEIGHT))
-clock = pg.time.Clock()
+pygame.init()
+screen = pygame.display.set_mode((WIDTH,HEIGHT))
+clock = pygame.time.Clock()
 
 # Load and scale images
-obj_size = pg.image.load(f'animation/run/0.png').get_height()//1.5
-OBSTACLE_IMG = pg.image.load("Image/bomb.png")
-OBSTACLE_IMG = pg.transform.scale(OBSTACLE_IMG, (obj_size,obj_size))
-SHIELD_ORB_IMG = pg.image.load("Image/shield.png")
-SHIELD_ORB_IMG = pg.transform.scale(SHIELD_ORB_IMG, (obj_size,obj_size))
-EXTRA_LIFE_ORB_IMG = pg.image.load("Image/extra_life.png")
-EXTRA_LIFE_ORB_IMG = pg.transform.scale(EXTRA_LIFE_ORB_IMG, (obj_size,obj_size))
+obj_size = pygame.image.load(f'animation/run/0.png').get_height()//1.5
+OBSTACLE_IMG = pygame.image.load("Image/bomb.png")
+OBSTACLE_IMG = pygame.transform.scale(OBSTACLE_IMG, (obj_size,obj_size))
+SHIELD_ORB_IMG = pygame.image.load("Image/shield.png")
+SHIELD_ORB_IMG = pygame.transform.scale(SHIELD_ORB_IMG, (obj_size,obj_size))
+EXTRA_LIFE_ORB_IMG = pygame.image.load("Image/extra_life.png")
+EXTRA_LIFE_ORB_IMG = pygame.transform.scale(EXTRA_LIFE_ORB_IMG, (obj_size,obj_size))
+EXTRA_JUMP_IMG = pygame.image.load("Image/extra_jump.png")
+EXTRA_JUMP_IMG = pygame.transform.scale(EXTRA_JUMP_IMG, (obj_size,obj_size))
 
-class Character(pg.sprite.Sprite):
+class Character(pygame.sprite.Sprite):
     """
     A class to represent a character in the game.
 
@@ -65,32 +66,31 @@ class Character(pg.sprite.Sprite):
         scale : float
             The scale factor for the character's images.
         """
-        pg.sprite.Sprite.__init__(self)
+        pygame.sprite.Sprite.__init__(self)
         self.velocity = 0
         self.score = 0
-        self.skyjump = 3
+        self.skyjump = 1
         self.temp_skyjump = self.skyjump
-        self.shield = False  # Shield attribute
         self.lives = 1  # Lives attribute
         self.__animation_list = []
         self.__frame_index = 0
         self.__action = 1
-        self.__update_time_animation = pg.time.get_ticks()
-        self.__update_time_score = pg.time.get_ticks()
+        self.__update_time_animation = pygame.time.get_ticks()
+        self.__update_time_score = pygame.time.get_ticks()
         temp_list = []
 
         for i in range(6):
-            img = pg.image.load(f'animation/run/{i}.png')
-            img = pg.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+            img = pygame.image.load(f'animation/run/{i}.png')
+            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
             temp_list.append(img)
         self.__animation_list.append(temp_list)
 
-        img = pg.image.load(f'animation/jump/1.png')
-        img = pg.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        img = pygame.image.load(f'animation/jump/1.png')
+        img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
         self.__animation_list.append([img])
 
-        img = pg.image.load(f'animation/fall/0.png')
-        img = pg.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        img = pygame.image.load(f'animation/fall/0.png')
+        img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
         self.__animation_list.append([img])
 
         self.image = self.__animation_list[self.__action][self.__frame_index]
@@ -135,8 +135,8 @@ class Character(pg.sprite.Sprite):
         #update imgae depending on current frame
         self.image = self.__animation_list[self.__action][self.__frame_index]
         #chech if enough time has passed since the last update
-        if pg.time.get_ticks() - self.__update_time_animation > ANIMATION_COOLDOWN:
-            self.__update_time_animation = pg.time.get_ticks()
+        if pygame.time.get_ticks() - self.__update_time_animation > ANIMATION_COOLDOWN:
+            self.__update_time_animation = pygame.time.get_ticks()
             self.__frame_index += 1
         #if the animation has run our the reset back to the start
         if self.__frame_index >= len(self.__animation_list[self.__action]):
@@ -144,8 +144,8 @@ class Character(pg.sprite.Sprite):
     
     def update_score(self):
         SCORE_COOLDOWN = 300
-        if pg.time.get_ticks() - self.__update_time_score > SCORE_COOLDOWN:
-            self.__update_time_score = pg.time.get_ticks()
+        if pygame.time.get_ticks() - self.__update_time_score > SCORE_COOLDOWN:
+            self.__update_time_score = pygame.time.get_ticks()
             self.score +=1
 
     def update_action(self, new_action):
@@ -162,7 +162,7 @@ class Character(pg.sprite.Sprite):
             self.__action = new_action
             #update the animation settings
             self.__frame_index = 0
-            self.__update_time_animation = pg.time.get_ticks()
+            self.__update_time_animation = pygame.time.get_ticks()
 
     def draw(self):
         """
@@ -170,7 +170,7 @@ class Character(pg.sprite.Sprite):
         """
         screen.blit(self.image, self.rect)
 
-class GameObject(pg.sprite.Sprite):
+class GameObject(pygame.sprite.Sprite):
     """
     A class to represent various objects in the game, including obstacles and orbs.
 
@@ -208,6 +208,8 @@ class GameObject(pg.sprite.Sprite):
             self.image = SHIELD_ORB_IMG
         elif self.type == "extra_life":
             self.image = EXTRA_LIFE_ORB_IMG
+        elif self.type == "extra_jump":
+            self.image = EXTRA_JUMP_IMG
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(WIDTH, 3 * WIDTH)
         self.rect.y = random.randint(0, HEIGHT - self.rect.height - 60)
@@ -217,7 +219,7 @@ class GameObject(pg.sprite.Sprite):
         Updates the position of the game object, moving it leftwards across the screen.
         Resets the object's position when it moves off the left side of the screen.
         """
+        global speed
         self.rect.x -= speed
         if self.rect.right < 0:
-            self.rect.x = random.randint(WIDTH, 3 * WIDTH)
-            self.rect.y = random.randint(0, HEIGHT - self.rect.height - 60)
+            self.kill()

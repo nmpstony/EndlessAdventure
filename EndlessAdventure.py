@@ -82,7 +82,7 @@ player = Character(250,295)
 
 # Create game objects
 game_objects = pg.sprite.Group()
-create_game_obj(speed)
+create_game_obj()
 all_sprites = pg.sprite.Group(player, *game_objects)
 
 while True:
@@ -94,7 +94,7 @@ while True:
     """
     clock.tick(FPS)
 
-    draw_bg(speed)
+    draw_bg()
 
     player.update_animation()
     player.draw()
@@ -104,7 +104,7 @@ while True:
     
     # Update
     if len(game_objects)<=4:
-        create_game_obj(speed)
+        create_game_obj()
         all_sprites = pg.sprite.Group(player, *game_objects)
 
     all_sprites.update()
@@ -152,5 +152,5 @@ while True:
     if player.shield:
         SHIELD_RECT.center=(player.rect.center)
         screen.blit(SHIELD, SHIELD_RECT)
-        
+
     pg.display.update()

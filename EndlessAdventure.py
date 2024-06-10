@@ -15,13 +15,15 @@ def draw_bg():
     screen.blit(bg,(0,0))
     screen.blit(GROUND,(ground1_x,HEIGHT - 64))
     screen.blit(GROUND,(ground2_x,HEIGHT - 64))
-    score_txt = font.render(f'Distance: {player.score}m', True, (255,255,255))
+    score_txt = font.render(f'Distance: {player.score}m', True, color_text)
     score_rect = score_txt.get_rect(center = (WIDTH//2, 30))
     screen.blit(score_txt,score_rect)
-    skyjump_txt = font.render(f'Skyjump: {player.temp_skyjump}', True, (255,255,255))
+    skyjump_txt = font.render(f'Skyjump: {player.temp_skyjump}', True, color_text)
     screen.blit(skyjump_txt,(10,15))
-    ground1_x -=speed
-    ground2_x -=speed
+    lives_txt = font.render(f'Lives: {player.lives}', True, color_text)
+    screen.blit(lives_txt,(10,50))
+    ground1_x -= speed
+    ground2_x -= speed
     if ground2_x <= 0:
         ground1_x = 0
         ground2_x = WIDTH
@@ -64,7 +66,7 @@ ground1_x = 0
 ground2_x = WIDTH
 jump = False
 count = 0
-
+color_text = (0,0,0)
 
 # Load and scale images
 bg=pg.transform.scale(pg.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
@@ -80,7 +82,7 @@ player = Character(250,295)
 
 # Create game objects
 game_objects = pg.sprite.Group()
-create_game_obj()
+create_game_obj(speed)
 all_sprites = pg.sprite.Group(player, *game_objects)
 
 while True:
@@ -92,7 +94,7 @@ while True:
     """
     clock.tick(FPS)
 
-    draw_bg()
+    draw_bg(speed)
 
     player.update_animation()
     player.draw()
@@ -102,7 +104,7 @@ while True:
     
     # Update
     if len(game_objects)<=4:
-        create_game_obj()
+        create_game_obj(speed)
         all_sprites = pg.sprite.Group(player, *game_objects)
 
     all_sprites.update()
@@ -134,11 +136,13 @@ while True:
     else:
         player.update_action(0) #Run
     jump = False
+
     for event in pg.event.get():
         # Quit game
         if event.type == pg.QUIT:
             pg.quit()
             exit()
+
         # Keyboard presses
         if event.type == pg.KEYDOWN:
             if (event.key == pg.K_SPACE or event.key == pg.K_UP):
@@ -146,7 +150,7 @@ while True:
                     jump = True
 
     if player.shield:
-    
         SHIELD_RECT.center=(player.rect.center)
         screen.blit(SHIELD, SHIELD_RECT)
+        
     pg.display.update()

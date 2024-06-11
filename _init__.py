@@ -8,14 +8,18 @@ clock = pygame.time.Clock()
 
 # Tải và thay đổi kích thước hình ảnh
 OBJ_SIZE = pygame.image.load(f'animation/run/0.png').get_height()//1.5
-OBSTACLE_IMG = pygame.image.load("Image/bomb.png")
-OBSTACLE_IMG = pygame.transform.scale(OBSTACLE_IMG, (OBJ_SIZE,OBJ_SIZE))
+BOMB_IMG = pygame.image.load("Image/bomb.png")
+BOMB_IMG = pygame.transform.scale(BOMB_IMG, (OBJ_SIZE,OBJ_SIZE))
 SHIELD_ORB_IMG = pygame.image.load("Image/shield.png")
 SHIELD_ORB_IMG = pygame.transform.scale(SHIELD_ORB_IMG, (OBJ_SIZE,OBJ_SIZE))
 EXTRA_LIFE_ORB_IMG = pygame.image.load("Image/extra_life.png")
 EXTRA_LIFE_ORB_IMG = pygame.transform.scale(EXTRA_LIFE_ORB_IMG, (OBJ_SIZE,OBJ_SIZE))
 EXTRA_JUMP_IMG = pygame.image.load("Image/extra_jump.png")
 EXTRA_JUMP_IMG = pygame.transform.scale(EXTRA_JUMP_IMG, (OBJ_SIZE,OBJ_SIZE))
+
+# Tải âm thanh
+BOMB_SOUND = pygame.mixer.Sound("Sound/bomb.mp3")
+POSITIVE_SOUND = pygame.mixer.Sound("Sound/positive.mp3")
 
 class Character(pygame.sprite.Sprite):
     """
@@ -181,7 +185,7 @@ class GameObject(pygame.sprite.Sprite):
     Thuộc tính
     ----------
     type : str
-        Loại đối tượng trò chơi, có thể là "obstacle", "shield", hoặc "extra_life".
+        Loại đối tượng trò chơi, có thể là "bomb", "shield", hoặc "extra_life".
     image : pygame.Surface
         Hình ảnh đại diện cho đối tượng trò chơi.
     rect : pygame.Rect
@@ -202,18 +206,23 @@ class GameObject(pygame.sprite.Sprite):
         ----------
         obj_type : str
             Loại đối tượng trò chơi, quyết định hình ảnh và hành vi của nó.
-            Các giá trị có thể là "obstacle", "shield", và "extra_life".
+            Các giá trị có thể là "bomb", "shield", và "extra_life".
         """
         super().__init__()
         self.type = obj_type
-        if self.type == "obstacle":
-            self.image = OBSTACLE_IMG
+        
+        if self.type == "bomb":
+            self.image = BOMB_IMG
+            self.sound = BOMB_SOUND
         elif self.type == "shield":
             self.image = SHIELD_ORB_IMG
+            self.sound = POSITIVE_SOUND
         elif self.type == "extra_life":
             self.image = EXTRA_LIFE_ORB_IMG
+            self.sound = POSITIVE_SOUND
         elif self.type == "extra_jump":
             self.image = EXTRA_JUMP_IMG
+            self.sound = POSITIVE_SOUND
         self.rect = self.image.get_rect()
         self.rect.x = random.randint(WIDTH, 3 * WIDTH)
         self.rect.y = random.randint(0, HEIGHT - self.rect.height - 60)

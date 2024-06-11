@@ -70,7 +70,6 @@ def game_intro():
         TextSurf, TextRect = text_objects("Endless Adventure", largeText)
         TextRect.center = ((WIDTH / 2), (HEIGHT // 3))
         screen.blit(TextSurf, TextRect)
-
         draw_button(screen, "Play", WIDTH//2-50, 200, 100, 50, green, bright_green, game_loop)
         draw_button(screen, "Quit", WIDTH//2-50, 260, 100, 50, red, bright_red, quit_game)
 
@@ -91,6 +90,7 @@ def game_over_screen():
     global game_intro_screen
     game_over_screen = True
     game_intro_screen = False
+    pygame.mixer.music.stop()
     while game_over_screen:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -129,10 +129,10 @@ def create_game_obj():
     """
     temp_x, temp_y =-1,-1
     for _ in range(5):
-        orb = GameObject("obstacle")
+        orb = GameObject("bomb")
         while True:
             if ((orb.rect.x + OBJ_SIZE) > temp_x > (orb.rect.x - OBJ_SIZE)) and ((orb.rect.y + OBJ_SIZE) > temp_y > (orb.rect.y - OBJ_SIZE)):
-                orb = GameObject("obstacle")
+                orb = GameObject("bomb")
                 continue
             else:
                 break
@@ -142,8 +142,10 @@ def create_game_obj():
     for _ in range(3):
         if player.skyjump <=3:
             orb_type = random.choice(["shield"]*2 + ["extra_life"]*2 + ["extra_jump"])
+        elif player.lives <= 3:
+            orb_type = random.choice(["shield"]*2 + ["extra_life"])
         else:
-            orb_type = random.choice(["shield", "shield", "extra_life"])
+            orb_type = "bomb"
         
         orb = GameObject(orb_type)
         while True:
@@ -195,7 +197,8 @@ def game_loop():
 
         # Kiểm tra va chạm
         for obj in pygame.sprite.spritecollide(player, game_objects, False):
-            if obj.type == "obstacle":
+            if obj.type == "bomb":
+                obj.sound.play()
                 if shield_active:
                     shield_active = False  # Sử dụng khiên
                 elif player.lives > 1:
@@ -204,12 +207,15 @@ def game_loop():
                     game_over_screen()  # Trò chơi kết thúc nếu không còn khiên và mạng
                 obj.kill()
             elif obj.type == "shield":
+                obj.sound.play()
                 activate_shield()   # Nhận khiên
                 obj.kill()
             elif obj.type == "extra_life":
+                obj.sound.play()
                 player.lives += 1   # Thêm mạng
                 obj.kill()
             elif obj.type == "extra_jump":
+                obj.sound.play()
                 player.skyjump += 1 # Thêm sky jump
                 obj.kill()
 
@@ -256,6 +262,7 @@ def main():
     global screen, clock, ground1_x, ground2_x, jump, shield_active, shield_duration, shield_start_time, SHIELD, GROUND, font, bg, all_sprites, speed, game_objects, player
     pygame.display.set_caption("Endless Adventure")
     clock = pygame.time.Clock()
+
     # Các thông số cơ bản của trò chơi
     ground1_x = 0
     ground2_x = WIDTH
@@ -268,6 +275,10 @@ def main():
     bg=pygame.transform.scale(pygame.image.load(r'Image/background.png'),(WIDTH, HEIGHT))
     GROUND=pygame.transform.scale(pygame.image.load(r'Image/ground.png'),(WIDTH, 64))
     SHIELD=pygame.transform.scale(pygame.image.load(r'Image/shield_effect.png'),(OBJ_SIZE*4,OBJ_SIZE*4))
+
+    # Tải nhạc nền
+    pygame.mixer.music.load("Sound/background.mp3")
+    pygame.mixer.music.play(-1)
 
     # Tạo nhân vật người chơi
     player = Character(250,295)

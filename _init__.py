@@ -1,77 +1,75 @@
 import pygame, random
 from config import *
 
-# Initialize the game screen and clock
+# Khởi tạo màn hình trò chơi và đồng hồ
 pygame.init()
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 clock = pygame.time.Clock()
 
-# Load and scale images
-obj_size = pygame.image.load(f'animation/run/0.png').get_height()//1.5
+# Tải và thay đổi kích thước hình ảnh
+OBJ_SIZE = pygame.image.load(f'animation/run/0.png').get_height()//1.5
 OBSTACLE_IMG = pygame.image.load("Image/bomb.png")
-OBSTACLE_IMG = pygame.transform.scale(OBSTACLE_IMG, (obj_size,obj_size))
+OBSTACLE_IMG = pygame.transform.scale(OBSTACLE_IMG, (OBJ_SIZE,OBJ_SIZE))
 SHIELD_ORB_IMG = pygame.image.load("Image/shield.png")
-SHIELD_ORB_IMG = pygame.transform.scale(SHIELD_ORB_IMG, (obj_size,obj_size))
+SHIELD_ORB_IMG = pygame.transform.scale(SHIELD_ORB_IMG, (OBJ_SIZE,OBJ_SIZE))
 EXTRA_LIFE_ORB_IMG = pygame.image.load("Image/extra_life.png")
-EXTRA_LIFE_ORB_IMG = pygame.transform.scale(EXTRA_LIFE_ORB_IMG, (obj_size,obj_size))
+EXTRA_LIFE_ORB_IMG = pygame.transform.scale(EXTRA_LIFE_ORB_IMG, (OBJ_SIZE,OBJ_SIZE))
 EXTRA_JUMP_IMG = pygame.image.load("Image/extra_jump.png")
-EXTRA_JUMP_IMG = pygame.transform.scale(EXTRA_JUMP_IMG, (obj_size,obj_size))
+EXTRA_JUMP_IMG = pygame.transform.scale(EXTRA_JUMP_IMG, (OBJ_SIZE,OBJ_SIZE))
 
 class Character(pygame.sprite.Sprite):
     """
-    A class to represent a character in the game.
+    Lớp đại diện cho nhân vật trong trò chơi.
 
-    Attributes
+    Thuộc tính
     ----------
     velocity : int
-        The current vertical velocity of the character.
+        Tốc độ dọc hiện tại của nhân vật.
     __animation_list : list
-        A list of lists containing the animation frames for different actions.
+        Danh sách các khung hình cho các hành động khác nhau của nhân vật.
     __frame_index : int
-        The current frame index of the animation.
+        Chỉ số khung hình hiện tại của hoạt ảnh.
     __action : int
-        The current __action of the character (e.g., running, jumping, falling).
+        Hành động hiện tại của nhân vật (chạy, nhảy, rơi).
     __update_time_animation : int
-        The time (in milliseconds) when the animation was last updated.
+        Thời gian (tính bằng mili giây) khi hoạt ảnh được cập nhật lần cuối.
     image : pygame.Surface
-        The current image/frame of the character.
+        Hình ảnh hiện tại của nhân vật.
     rect : pygame.Rect
-        The rectangular area representing the character's position and size.
+        Hình chữ nhật đại diện cho vị trí và kích thước của nhân vật.
 
-    Methods
+    Phương thức
     -------
-    __init__(x, y, scale)
-        Initializes the character with a position and scale.
+    __init__(x, y)
+        Khởi tạo nhân vật với vị trí và tỉ lệ.
     gravity()
-        Applies gravity to the character.
+        Áp dụng trọng lực lên nhân vật.
     jump(jump)
-        Makes the character jump if the jump parameter is True.
+        Khiến nhân vật nhảy nếu tham số jump là True.
     update_animation()
-        Updates the character's animation based on the current __action.
+        Cập nhật hoạt ảnh của nhân vật dựa trên hành động hiện tại.
     update_action(new_action)
-        Updates the character's __action and resets the animation if the __action changes.
+        Cập nhật hành động của nhân vật và đặt lại hoạt ảnh nếu hành động thay đổi.
     draw()
-        Draws the character on the screen.
+        Vẽ nhân vật lên màn hình.
     """
     def __init__(self, x, y):
         """
-        Initializes the character with a given position and scale.
+        Khởi tạo nhân vật với vị trí và tỉ lệ nhất định.
 
-        Parameters
+        Tham số
         ----------
         x : int
-            The x-coordinate of the character's position.
+            Tọa độ x của vị trí nhân vật.
         y : int
-            The y-coordinate of the character's position.
-        scale : float
-            The scale factor for the character's images.
+            Tọa độ y của vị trí nhân vật.
         """
         pygame.sprite.Sprite.__init__(self)
         self.velocity = 0
         self.score = 0
         self.skyjump = 1
         self.temp_skyjump = self.skyjump
-        self.lives = 1  # Lives attribute
+        self.lives = 1
         self.__animation_list = []
         self.__frame_index = 0
         self.__action = 1
@@ -79,16 +77,19 @@ class Character(pygame.sprite.Sprite):
         self.__update_time_score = pygame.time.get_ticks()
         temp_list = []
 
+        # Tải hoạt ảnh chạy
         for i in range(6):
             img = pygame.image.load(f'animation/run/{i}.png')
             img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
             temp_list.append(img)
         self.__animation_list.append(temp_list)
 
+        # Tải hoạt ảnh nhảy
         img = pygame.image.load(f'animation/jump/1.png')
         img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
         self.__animation_list.append([img])
 
+        # Tải hoạt ảnh rơi
         img = pygame.image.load(f'animation/fall/0.png')
         img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
         self.__animation_list.append([img])
@@ -99,10 +100,10 @@ class Character(pygame.sprite.Sprite):
 
     def gravity(self):
         """
-        Applies gravity to the character, updating its vertical velocity and position.
-        Prevents the character from moving above the top or below the bottom of the screen.
+        Áp dụng trọng lực lên nhân vật, cập nhật tốc độ dọc và vị trí của nó.
+        Ngăn nhân vật di chuyển lên trên hoặc xuống dưới màn hình.
         """
-        self.velocity += 0.25  # Gravity effect
+        self.velocity += 0.25  # Hiệu ứng trọng lực
         self.rect.y += self.velocity
         if self.rect.top < 0:
             self.rect.top = 0
@@ -115,34 +116,37 @@ class Character(pygame.sprite.Sprite):
 
     def jump(self,jump):
         """
-        Makes the character jump by setting a negative vertical velocity.
+        Khiến nhân vật nhảy bằng cách đặt tốc độ dọc thành giá trị âm.
 
-        Parameters
+        Tham số
         ----------
         jump : bool
-            If True, the character will jump.
+            Nếu True, nhân vật sẽ nhảy.
         """
         if jump:
             if self.rect.bottom < HEIGHT-50:
                 self.temp_skyjump -= 1
-            self.velocity = -7
+            self.velocity = -7  # Sức bật của cú nhảy
 
     def update_animation(self):
         """
-        Updates the character's animation frame based on the current __action and elapsed time.
+        Cập nhật khung hình hoạt ảnh của nhân vật dựa trên hành động hiện tại và thời gian đã trôi qua.
         """
         ANIMATION_COOLDOWN = 150
-        #update imgae depending on current frame
+        # Cập nhật hình ảnh dựa trên khung hình hiện tại
         self.image = self.__animation_list[self.__action][self.__frame_index]
-        #chech if enough time has passed since the last update
+        # Kiểm tra nếu đủ thời gian đã trôi qua từ lần cập nhật cuối
         if pygame.time.get_ticks() - self.__update_time_animation > ANIMATION_COOLDOWN:
             self.__update_time_animation = pygame.time.get_ticks()
             self.__frame_index += 1
-        #if the animation has run our the reset back to the start
+        # Nếu hoạt ảnh đã chạy hết, đặt lại về khung hình đầu tiên
         if self.__frame_index >= len(self.__animation_list[self.__action]):
             self.__frame_index = 0
     
     def update_score(self):
+        """
+        Cập nhật điểm số của nhân vật dựa trên thời gian đã trôi qua.
+        """
         SCORE_COOLDOWN = 300
         if pygame.time.get_ticks() - self.__update_time_score > SCORE_COOLDOWN:
             self.__update_time_score = pygame.time.get_ticks()
@@ -150,55 +154,55 @@ class Character(pygame.sprite.Sprite):
 
     def update_action(self, new_action):
         """
-        Updates the character's __action and resets the animation if the __action changes.
+        Cập nhật hành động của nhân vật và đặt lại hoạt ảnh nếu hành động thay đổi.
 
-        Parameters
+        Tham số
         ----------
         new_action : int
-            The new __action for the character.
+            Hành động mới của nhân vật.
         """
-        #check if the new __action is different to the pervious one
+        # Kiểm tra nếu hành động mới khác với hành động trước đó
         if new_action != self.__action:
             self.__action = new_action
-            #update the animation settings
+            # Cập nhật cài đặt hoạt ảnh
             self.__frame_index = 0
             self.__update_time_animation = pygame.time.get_ticks()
 
     def draw(self):
         """
-        Draws the character on the screen.
+        Vẽ hình ảnh lên màn hình.
         """
         screen.blit(self.image, self.rect)
 
 class GameObject(pygame.sprite.Sprite):
     """
-    A class to represent various objects in the game, including obstacles and orbs.
+    Lớp đại diện cho các đối tượng trong trò chơi, bao gồm chướng ngại vật và vật phẩm.
 
-    Attributes
+    Thuộc tính
     ----------
     type : str
-        The type of the game object, which can be "obstacle", "shield", or "extra_life".
+        Loại đối tượng trò chơi, có thể là "obstacle", "shield", hoặc "extra_life".
     image : pygame.Surface
-        The image representing the game object.
+        Hình ảnh đại diện cho đối tượng trò chơi.
     rect : pygame.Rect
-        The rectangular area representing the game object's position and size.
+        Hình chữ nhật đại diện cho vị trí và kích thước của đối tượng trò chơi.
 
-    Methods
+    Phương thức
     -------
     __init__(obj_type)
-        Initializes the game object with a specific type.
+        Khởi tạo đối tượng trò chơi với một loại cụ thể.
     update()
-        Updates the position of the game object, moving it leftwards across the screen.
+        Cập nhật vị trí của đối tượng trò chơi, di chuyển nó sang trái màn hình.
     """
     def __init__(self, obj_type):
         """
-        Initializes the game object with a specific type.
+        Khởi tạo đối tượng trò chơi với một loại cụ thể.
 
-        Parameters
+        Tham số
         ----------
         obj_type : str
-            The type of the game object, which determines its appearance and behavior.
-            Possible values are "obstacle", "shield", and "extra_life".
+            Loại đối tượng trò chơi, quyết định hình ảnh và hành vi của nó.
+            Các giá trị có thể là "obstacle", "shield", và "extra_life".
         """
         super().__init__()
         self.type = obj_type
@@ -216,8 +220,8 @@ class GameObject(pygame.sprite.Sprite):
 
     def update(self):
         """
-        Updates the position of the game object, moving it leftwards across the screen.
-        Resets the object's position when it moves off the left side of the screen.
+        Cập nhật vị trí của đối tượng trò chơi, di chuyển nó sang trái màn hình.
+        Đặt lại vị trí của đối tượng khi nó di chuyển ra khỏi phía bên trái màn hình.
         """
         global speed
         self.rect.x -= speed

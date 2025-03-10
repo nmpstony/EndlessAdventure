@@ -8,11 +8,12 @@ The project takes the theme of a commonly seen game: "Endless Run"
 
 ## How to Run:
 
-To try the project, download all the files into a folder.
+To try the project:
+- Download all the files into a folder.
 
-Open CMD in that folder,
+- Open CMD in that folder,
 
-Run the command `python EndlessAdventure.py`
+- Run the command `python EndlessAdventure.py`
 
 ***
 
